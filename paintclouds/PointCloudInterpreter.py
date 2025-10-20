@@ -118,9 +118,11 @@ class PointCloudInterpreter:
 
         with open(self.ann_path, 'r') as f:
             ann_data = json.load(f)
+
             objects = ann_data.get("objects", [])
             figures = ann_data.get("figures", [])
 
+            # mappa bjectKey -> figure[]
             figure_map = {}
             for fig in figures:
                 if fig.get("geometryType") == "point_cloud":
@@ -129,9 +131,11 @@ class PointCloudInterpreter:
 
             self.branch_table = {}
 
+            #file di output per questo dataset
             txt_output_file = self.output_folder / f"{self.current_dataset_name}_albero.txt"
             with open(txt_output_file, "w") as out:
-                out.write(f'albero del dataset "{self.current_dataset_name}" {{\n\n')
+                # intestazione dataset
+                out.write(f'dataset ="{self.current_dataset_name}" {{\n\n')
 
                 for obj in objects:
                     obj_key = obj["key"]
@@ -150,21 +154,17 @@ class PointCloudInterpreter:
                             "points": branch_points
                         }
 
-                        # Scrittura formattata
-                        out.write(f'  "coordinate {class_title}" : {{\n')
+                        # Scrittura in formato leggibile
+                        out.write(f'  branch "{class_title}" : {{\n')
                         for pt in branch_points:
                             out.write(f'    ({pt[0]:.5f}, {pt[1]:.5f}, {pt[2]:.5f});\n')
-                        out.write('  },\n')
-
-                        out.write(f'  altre info {class_title} : {{\n')
-                        out.write(f'    numero punti: {len(branch_points)};\n')
-                        out.write(f'    objectKey: {obj_key};\n')
-                        out.write('  },\n\n')
+                        out.write(f'    # punti: {len(branch_points)}\n')
+                        out.write(f'  }}\n\n')
 
                 out.write('}\n')
 
-        print(f"Tabella degli oggetti creata con {len(self.branch_table)} voci.")
-        print(f"📄 File strutturato salvato in: {txt_output_file}")
+        print(f"Tabella con {len(self.branch_table)} rami creata.")
+        print(f"File salvato in: {txt_output_file}")
 
     def read_point_cloud(self, basefolder):
         if self.set_base_path(basefolder):
