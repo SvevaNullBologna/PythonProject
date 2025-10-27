@@ -17,6 +17,7 @@ class PointCloudInterpreter:
         self.points = None
         self.output_folder = None
         self.output_file = None
+        self.retrieved_data = None
 
     def set_base_path(self, basefolder): #importa la cartella principale
         base = Path(basefolder)
@@ -76,95 +77,50 @@ class PointCloudInterpreter:
         print(f"Loaded {len(self.points)} points from {self.pcd_path.name}")
 
     def group_points_by_branch(self):
-        """
-                    il json è fatto così:
-                    {
-                        "description" : "",
-                        "key" : "mix di numeri e lettere minuscole",
-                        "tags" : [],
-                        "objects" : [ -> entità logiche annotate (Branch 1, Tree, ...) . Cosa stiamo etichettando
-                            {
-                                "key": "mix di numeri e lettere minuscole", -> identificatore univoco
-                                "classTitle" : "Branch 1", -> tipo di ramo, tronco, ecc...
-                                "tags" : [],
-                                "labelerLogin" : "OresteGino",
-                                "updatedAt" : "data",
-                                "createdAt" : "data"
-                            },
-                            ... altri oggetti
-                        ]
-                        "figures": [ -> dove si trovano nella point cloud
-                            {
-                                "key": "mix di numeri e lettere minuscole",
-                                "objectKey": "mix di numeri e lettere minuscole",
-                                "geometryTime": "point_cloud",
-                                "geometry": {
-                                    "indices": [
-                                        numero,
-                                        numero,
-                                        numero,
-                                        ...
-                                    ]
-                                },
-                                "labelerLogin" : "OresteGino",
-                                "updatedAt" : "data",
-                                "createdAt" : "data"
-                            },
-                            ... altre figure
-                        ]
-                    }
-
-                """
-
         with open(self.ann_path, 'r') as f:
             ann_data = json.load(f)
 
-            objects = ann_data.get("objects", [])
-            figures = ann_data.get("figures", [])
+        objects = ann_data.get("objects", [])
+        figures = ann_data.get("figures", [])
 
-            # mappa bjectKey -> figure[]
-            figure_map = {}
-            for fig in figures:
-                if fig.get("geometryType") == "point_cloud":
-                    key = fig["objectKey"]
-                    figure_map.setdefault(key, []).append(fig)
+        # mappa objectKey -> figure[]
+        figure_map = {}
+        for fig in figures:
+            if fig.get("geometryType") == "point_cloud":
+                key = fig["objectKey"]
+                figure_map.setdefault(key, []).append(fig)
 
-            self.branch_table = {}
+        self.branch_table = {}
+        branches = []
 
-            #file di output per questo dataset
-            txt_output_file = self.output_folder / f"{self.current_dataset_name}_albero.txt"
-            with open(txt_output_file, "w") as out:
-                # intestazione dataset
-                out.write(f'dataset ="{self.current_dataset_name}" {{\n\n')
+        for obj in objects:
+            obj_key = obj["key"]
+            class_title = obj["classTitle"]
 
-                for obj in objects:
-                    obj_key = obj["key"]
-                    class_title = obj["classTitle"]
+            all_indices = []
+            for fig in figure_map.get(obj_key, []):
+                all_indices.extend(fig["geometry"]["indices"])
 
-                    all_indices = []
-                    for fig in figure_map.get(obj_key, []):
-                        all_indices.extend(fig["geometry"]["indices"])
+            if all_indices:
+                unique_indices = sorted(set(all_indices))
+                branch_points = self.points[unique_indices]
 
-                    if all_indices:
-                        unique_indices = sorted(set(all_indices))
-                        branch_points = self.points[unique_indices]
+                length, diameter = self.compute_branch_metrics(branch_points)
 
-                        self.branch_table[obj_key] = {
-                            "classTitle": class_title,
-                            "points": branch_points
-                        }
+                branch_info = {
+                    "classTitle": class_title,
+                    "length": length,
+                    "diameter": diameter,
+                    "numPoints": len(branch_points),
+                    "points": [[float(pt[0]), float(pt[1]), float(pt[2])] for pt in branch_points]
+                }
 
-                        # Scrittura in formato leggibile
-                        out.write(f'  branch "{class_title}" : {{\n')
-                        for pt in branch_points:
-                            out.write(f'    ({pt[0]:.5f}, {pt[1]:.5f}, {pt[2]:.5f});\n')
-                        out.write(f'    # punti: {len(branch_points)}\n')
-                        out.write(f'  }}\n\n')
-
-                out.write('}\n')
-
-        print(f"Tabella con {len(self.branch_table)} rami creata.")
-        print(f"File salvato in: {txt_output_file}")
+                branches.append(branch_info)
+                self.branch_table[obj_key] = branch_info
+        self.retrieved_data = {
+            "dataset": self.current_dataset_name,
+            "branches": branches
+        }
 
     def read_point_cloud(self, basefolder):
         if self.set_base_path(basefolder):
@@ -173,13 +129,47 @@ class PointCloudInterpreter:
             print("error with loading a single point cloud")
             return False
 
+    def compute_branch_metrics(self, branch_points):
+        """
+        Calcola lunghezza e diametro di un ramo usando Open3D.
+        - Lunghezza: distanza massima lungo la curvatura (asse principale)
+        - Diametro: distanza massima perpendicolare all'asse
+        """
+        if len(branch_points) < 2:
+            return 0.0, 0.0
+
+        branch_pcd = o3d.geometry.PointCloud()
+        branch_pcd.points = o3d.utility.Vector3dVector(branch_points)
+        branch_pcd = branch_pcd.voxel_down_sample(voxel_size=0.001)
+
+        pts = np.asarray(branch_pcd.points)
+        center = pts.mean(axis=0)
+        _, _, Vt = np.linalg.svd(pts - center)
+        main_axis = Vt[0]
+
+        proj = (pts - center) @ main_axis
+        length = proj.max() - proj.min()
+
+        diffs = pts - center
+        cross_prod = np.linalg.norm(np.cross(diffs, main_axis), axis=1)
+        diameter = 2 * cross_prod.max()
+
+        return float(length), float(diameter)
+
     def print_branch_table(self):
         print(self.branch_table)
+
+    def write_json_file(self, json_data):
+        if json_data is not None:
+            json_output_file = self.output_folder / f"{self.current_dataset_name}_albero.json"
+            with open(json_output_file, "w") as out_json:
+                json.dump(json_data, out_json, indent=2)
+        print(f"Tabella con {len(self.branch_table)} rami creata.")
+        print(f"File salvato in: {json_output_file}")
 
 if __name__ == '__main__':
     interpreter = PointCloudInterpreter()
     interpreter.read_point_cloud(basefolder=r"C:\Users\Sveva\Desktop\Materiale")
-    interpreter.print_branch_table()
-
+    interpreter.write_json_file(interpreter.retrieved_data)
 
 
