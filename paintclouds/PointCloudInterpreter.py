@@ -122,7 +122,22 @@ class PointCloudInterpreter:
             "branches": branches
         }
 
+    def reset_interpreter(self):
+        self.base = None
+        self.datasets_path = None
+        self.current_dataset_index = 0
+        self.current_dataset_name = None
+        self.pcd_path = None
+        self.ann_path = None
+        self.branch_table = None
+        self.points = None
+        self.output_folder = None
+        self.output_file = None
+        self.retrieved_data = None
+
+
     def read_point_cloud(self, basefolder):
+        self.reset_interpreter()
         if self.set_base_path(basefolder):
             return True
         else:
