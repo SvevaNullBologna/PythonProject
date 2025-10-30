@@ -20,6 +20,7 @@ class PointCloudInterpreter:
         self.output_folder = None
         self.output_file = None
         self.retrieved_data = None
+        self.estimator = BranchEstimator()
 
     def set_base_path(self, basefolder): #importa la cartella principale
         base = Path(basefolder)
@@ -107,7 +108,11 @@ class PointCloudInterpreter:
                 unique_indices = sorted(set(all_indices))
                 branch_points = self.points[unique_indices]
 
-                length, diameter = BranchEstimator.compute_branch_metrics(branch_points)
+                """
+                parametri di default di compute_branch_metrics: voxel_size = 0.001, min_points_branch=3, diameter_scale = 2, curvature_threshold=0.1, outlier_radius=None,  nb_points=10
+                """
+
+                length, diameter = self.estimator.compute_branch_metrics(branch_points)
 
                 branch_info = {
                     "classTitle": class_title,
