@@ -1,8 +1,10 @@
 import json
-
+from BestCutAlgorithm import BranchEstimator
 import open3d as o3d #per leggere i pointcloud
 from pathlib import Path
 import numpy as np
+
+from BestCutAlgorithm.BranchEstimator import BranchEstimator
 
 
 class PointCloudInterpreter:
@@ -105,7 +107,7 @@ class PointCloudInterpreter:
                 unique_indices = sorted(set(all_indices))
                 branch_points = self.points[unique_indices]
 
-                length, diameter = self.compute_branch_metrics(branch_points)
+                length, diameter = BranchEstimator.compute_branch_metrics(branch_points)
 
                 branch_info = {
                     "classTitle": class_title,
@@ -144,32 +146,7 @@ class PointCloudInterpreter:
             print("error with loading a single point cloud")
             return False
 
-    def compute_branch_metrics(self, branch_points):
-        """
-        Calcola lunghezza e diametro di un ramo usando Open3D.
-        - Lunghezza: distanza massima lungo la curvatura (asse principale)
-        - Diametro: distanza massima perpendicolare all'asse
-        """
-        if len(branch_points) < 2:
-            return 0.0, 0.0
 
-        branch_pcd = o3d.geometry.PointCloud()
-        branch_pcd.points = o3d.utility.Vector3dVector(branch_points)
-        branch_pcd = branch_pcd.voxel_down_sample(voxel_size=0.001)
-
-        pts = np.asarray(branch_pcd.points)
-        center = pts.mean(axis=0)
-        _, _, Vt = np.linalg.svd(pts - center)
-        main_axis = Vt[0]
-
-        proj = (pts - center) @ main_axis
-        length = proj.max() - proj.min()
-
-        diffs = pts - center
-        cross_prod = np.linalg.norm(np.cross(diffs, main_axis), axis=1)
-        diameter = 2 * cross_prod.max()
-
-        return float(length), float(diameter)
 
     def print_branch_table(self):
         print(self.branch_table)
@@ -179,8 +156,8 @@ class PointCloudInterpreter:
             json_output_file = self.output_folder / f"{self.current_dataset_name}_albero.json"
             with open(json_output_file, "w") as out_json:
                 json.dump(json_data, out_json, indent=2)
-        print(f"Tabella con {len(self.branch_table)} rami creata.")
-        print(f"File salvato in: {json_output_file}")
+            print(f"Tabella con {len(self.branch_table)} rami creata.")
+            print(f"File salvato in: {json_output_file}")
 
 if __name__ == '__main__':
     interpreter = PointCloudInterpreter()
