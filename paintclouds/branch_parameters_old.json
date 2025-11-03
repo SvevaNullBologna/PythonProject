@@ -1,0 +1,13 @@
+{
+  "outlier_radius": null,
+  "nb_points": 10,
+  "voxel_size": 0.001,
+  "min_number_points": 3,
+  "min_points_branch": 3,
+  "curvature_threshold": 0.1,
+  "diameter_scale": 2,
+  "age_factor": 25.0,
+  "length_factor": 2.5,
+  "bud_length_factor": 15.0,
+  "bud_curvature_factor": 0.8
+}
