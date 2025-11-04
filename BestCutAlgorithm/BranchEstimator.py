@@ -1,4 +1,6 @@
 import json
+import os
+import shutil
 
 import open3d as o3d #per leggere i pointcloud
 import numpy as np
@@ -22,44 +24,76 @@ class BranchEstimator:
         self.bud_curvature_factor = 0.8
 
         # if file does not exist, create branch_parameters_old and write data -> starting point
-        self.param_file = Path("branch_parameters_old.json")
-        self.updated_param_file = Path("branch_parameters_new.json")
-        self.set_starting_parameters_in_json()
+        self.old_param_file = Path("branch_parameters_old.json")
+        self.new_param_file = Path("branch_parameters_new.json")
+        self.__set_starting_parameters_in_json()
 
 
-    def set_starting_parameters_in_json(self):
-        if not self.param_file.exists():
-            data = {
-                "outlier_radius": self.outlier_radius,
-                "nb_points": self.nb_points,
-                "voxel_size": self.voxel_size,
-                "min_number_points": self.min_number_points,
-                "min_points_branch": self.min_points_branch,
-                "curvature_threshold": self.curvature_threshold,
-                "diameter_scale": self.diameter_scale,
-                "age_factor": self.age_factor,
-                "length_factor": self.length_factor,
-                "bud_length_factor": self.bud_length_factor,
-                "bud_curvature_factor": self.bud_curvature_factor
-            }
-            with open(self.param_file, "w") as f:
-                json.dump(data, f, indent=2)
-            print("starting parameter's file created")
+    """
+        FOR THE AI EVOLUTION ALGORITHM AND FILE MANAGING
+    """
+
+    def __set_starting_parameters_in_json(self):
+        if not self.new_param_file.exists() or os.stat(self.new_param_file).st_size == 0:
+            if not self.old_param_file.exists() or os.stat(self.old_param_file).st_size == 0:
+                self.__write_params_on_file(use_old=True)
+                print("starting param's file created")
+            else:
+                self.__read_params_on_file(use_old=False)
+                print("starting param's file already exists")
         else:
+            self.__read_params_on_file(use_old=False)
             print("starting parameter's file already exists")
 
-    def upgrade_parameters(self):  #AI
-        if not self.updated_param_file.exists():
-            print("no updated parameter's file found, keeping defaults")
+
+    def __write_params_on_file(self, use_old: bool):
+        filename = self.new_param_file if use_old else self.old_param_file
+        data = {
+            "outlier_radius": self.outlier_radius,
+            "nb_points": self.nb_points,
+            "voxel_size": self.voxel_size,
+            "min_number_points": self.min_number_points,
+            "min_points_branch": self.min_points_branch,
+            "curvature_threshold": self.curvature_threshold,
+            "diameter_scale": self.diameter_scale,
+            "age_factor": self.age_factor,
+            "length_factor": self.length_factor,
+            "bud_length_factor": self.bud_length_factor,
+            "bud_curvature_factor": self.bud_curvature_factor
+        }
+        with open(filename, "w") as f:
+            json.dump(data, f, indent=2)
+        print(f"starting parameter's file created: {filename}")
+
+    def __read_params_on_file(self, use_old: bool):
+        filename = self.new_param_file if use_old else self.old_param_file
+        with open(filename, 'r') as f:
+            data = json.load(f)
+        for key, value in data.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+        print(f"Parameters loaded from: {filename}")
+
+
+    def __discard_parameters(self, use_old: bool):
+        filename = self.old_param_file if use_old else self.new_param_file
+        if filename.exists():
+            filename.unlink()
+
+    def __promote_new_weights(self):
+        if not self.new_param_file.exists() or (os.stat(self.new_param_file).st_size == 0) :
+            print("no new parameters file found to promote")
         else:
-            with open(self.updated_param_file, "r") as f:
-                data = json.load(f)
-                for key, value in data.items():
-                    if hasattr(self, key):
-                        setattr(self, key, value)
+            shutil.move(self.new_param_file, self.old_param_file)
+            print(f"new parameters promoted to old")
 
-                print("🔁 Parameters updated from:", self.updated_param_file)
 
+    def calculate_new_branch_estimator_parameters(self):
+        pass
+
+    """
+        FOR THE ALGORITHM ESTIMATING LENGTH, DIAMETER, AGE, ECC... 
+    """
 
     def _clean_branch_points(self, branch_points):
         branch_pcd = o3d.geometry.PointCloud()

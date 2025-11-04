@@ -1,3 +1,5 @@
+import shutil
+
 from data_structure.GrapeVine import GrapeVine
 from data_structure.Branch import Branch
 import json
@@ -34,9 +36,7 @@ class BranchPruner:
 
     def __write_weights_on_file(self, use_old : bool):
         filename = self.old_weight_file if use_old else self.new_weight_file
-        data = {
-            **self.weights, "cut_threshold": self.cut_treshold
-        }
+        data = {**self.weights, "cut_threshold": self.cut_treshold}
         with open(filename, "w") as f:
             json.dump(data, f, indent=2)
         print(f"weight's file written on {filename}")
@@ -45,19 +45,27 @@ class BranchPruner:
         filename = self.old_weight_file if use_old else self.new_weight_file
         with open(filename, "r") as f:
             data = json.load(f)
-            for key, value in data.items():
-                if key in self.weights:
-                    self.weights[key] = value
-                elif key == "cut_treshold":
-                    self.cut_treshold = value
+        for key, value in data.items():
+            if key in self.weights:
+                self.weights[key] = value
+            elif key == "cut_treshold":
+                self.cut_treshold = value
 
-        print("weights updated")
+        print(f"weights updated from {filename}")
 
-    def calculate_new_branch_estimator_parameters(self):
-        pass
 
-    def calculate_new_cut_criteria_parameters(self):
-        pass
+    def __discard_weights(self, use_old: bool):
+        filename = self.old_weight_file if use_old else self.new_weight_file
+        if filename.exists():
+            filename.unlink()
+
+    def __promote_new_weights(self):
+        if not self.new_weight_file.exists() or (os.stat(self.new_weight_file).st_size == 0) :
+            print("no new weights file found to promote")
+        else:
+            shutil.move(self.new_weight_file, self.old_weight_file)
+            print(f"new weights promoted to old")
+
 
     def calculate_best_cut(self, grapevine: GrapeVine ):
         branches_to_cut = []
@@ -72,3 +80,8 @@ class BranchPruner:
             value = getattr(branch, key,0) or 0
             score += weight * value
         return score
+
+
+
+    def calculate_new_cut_criteria_parameters(self):
+        pass
