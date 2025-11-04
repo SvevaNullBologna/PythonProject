@@ -171,9 +171,8 @@ class PointCloudInterpreter:
             print(f"Tabella con {len(self.branch_table)} rami creata.")
             print(f"File salvato in: {json_output_file}")
 
-if __name__ == '__main__':
-    interpreter = PointCloudInterpreter()
-    interpreter.read_point_cloud(basefolder=r"C:\Users\Sveva\Desktop\Materiale")
-    interpreter.write_json_file(interpreter.retrieved_data)
 
 
+    def interpreting_dataset(self, basefolder):
+        self.read_point_cloud(basefolder)
+        self.write_json_file(self.retrieved_data)

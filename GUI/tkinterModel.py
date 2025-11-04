@@ -48,7 +48,7 @@ class tkinterModel(tk.Frame):
         self.entries = {}
 
         row = 0
-        ttk.Label(self, text="Estimator Parameters", font=("Arial", 11, "bold")).grid(row=row, column=0, columnspan=2,
+        ttk.Label(self, text="PARAMETRI PER LA MISURAZIONE DELL' ALBERO", font=("Arial", 11, "bold")).grid(row=row, column=0, columnspan=2,
                                                                                       pady=(5, 2))
         row += 1
 
@@ -60,7 +60,7 @@ class tkinterModel(tk.Frame):
             self.entries[key] = entry
             row += 1
 
-        ttk.Label(self, text="Pruner Weights", font=("Arial", 11, "bold")).grid(row=row, column=0, columnspan=2,
+        ttk.Label(self, text="PESI DELLE CARATTERISTICHE NELLA DECISIONE DEL TAGLIO", font=("Arial", 11, "bold")).grid(row=row, column=0, columnspan=2,
                                                                                 pady=(10, 2))
         row += 1
 

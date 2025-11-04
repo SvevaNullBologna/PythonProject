@@ -17,8 +17,8 @@ class BranchPruner:
             "curvature": 0.3
         }
 
-        self.old_weight_file = Path("weights_old.json")
-        self.new_weight_file = Path("weights_new.json")
+        self.old_weight_file = Path(r"C:\Users\Sveva\PycharmProjects\PythonProject\BestCutAlgorithm\weights_old.json")
+        self.new_weight_file = Path(r"C:\Users\Sveva\PycharmProjects\PythonProject\BestCutAlgorithm\weights_new.json")
         self.__set_starting_weights()
 
     def __set_starting_weights(self):
