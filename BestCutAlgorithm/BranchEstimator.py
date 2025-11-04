@@ -88,7 +88,7 @@ class BranchEstimator:
             print(f"new parameters promoted to old")
 
 
-    def calculate_new_branch_estimator_parameters(self):
+    def evolve_parameters(self):
         pass
 
     """

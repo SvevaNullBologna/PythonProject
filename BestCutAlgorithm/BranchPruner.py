@@ -82,7 +82,7 @@ class BranchPruner:
         return score
 
 
-    def calculate_new_cut_criteria_parameters(self):
+    def calculate_new_weights_and_treshold(self):
         pass
 
 
