@@ -47,7 +47,7 @@ class BranchEstimator:
 
 
     def __write_params_on_file(self, use_old: bool):
-        filename = self.new_param_file if use_old else self.old_param_file
+        filename = self.old_param_file if use_old else self.new_param_file
         data = {
             "outlier_radius": self.outlier_radius,
             "nb_points": self.nb_points,
@@ -66,7 +66,7 @@ class BranchEstimator:
         print(f"starting parameter's file created: {filename}")
 
     def __read_params_on_file(self, use_old: bool):
-        filename = self.new_param_file if use_old else self.old_param_file
+        filename = self.old_param_file if use_old else self.new_param_file
         with open(filename, 'r') as f:
             data = json.load(f)
         for key, value in data.items():
@@ -209,4 +209,18 @@ class BranchEstimator:
                 "center": center.tolist(),
                 "main_axis": main_axis.tolist()}
 
+"""
+    for test reasons
+    
+def test_branch_estimator():
+    print("\n=== Testing BranchEstimator ===")
+    be = BranchEstimator()
+    print("Parameters loaded:")
+    for k, v in be.__dict__.items():
+        if not k.startswith("_"):
+            print(f"  {k}: {v}")
 
+if __name__ == "__main__":
+    test_branch_estimator()
+
+"""

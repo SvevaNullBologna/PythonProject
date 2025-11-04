@@ -7,8 +7,8 @@ import os
 from pathlib import Path
 
 class BranchPruner:
-    def __init__(self, cut_treshold=1.0):
-        self.cut_treshold = cut_treshold
+    def __init__(self, cut_threshold=1.0):
+        self.cut_threshold = cut_threshold
         self.weights = {
             "length": 1.0,
             "diameter": 0.5,
@@ -36,7 +36,7 @@ class BranchPruner:
 
     def __write_weights_on_file(self, use_old : bool):
         filename = self.old_weight_file if use_old else self.new_weight_file
-        data = {**self.weights, "cut_threshold": self.cut_treshold}
+        data = {**self.weights, "cut_threshold": self.cut_threshold}
         with open(filename, "w") as f:
             json.dump(data, f, indent=2)
         print(f"weight's file written on {filename}")
@@ -48,8 +48,8 @@ class BranchPruner:
         for key, value in data.items():
             if key in self.weights:
                 self.weights[key] = value
-            elif key == "cut_treshold":
-                self.cut_treshold = value
+            elif key == "cut_threshold":
+                self.cut_threshold = value
 
         print(f"weights updated from {filename}")
 
@@ -70,7 +70,7 @@ class BranchPruner:
     def calculate_best_cut(self, grapevine: GrapeVine ):
         branches_to_cut = []
         for branch in grapevine.tree_elements:
-            if branch.classTitle != "tree" and self._calculate_branch_score(branch) >= self.cut_treshold :
+            if branch.classTitle != "tree" and self._calculate_branch_score(branch) >= self.cut_threshold :
                 branches_to_cut.append(branch)
         return branches_to_cut
 
@@ -82,6 +82,9 @@ class BranchPruner:
         return score
 
 
-
     def calculate_new_cut_criteria_parameters(self):
         pass
+
+
+if __name__ == "__main__":
+    bp = BranchPruner()

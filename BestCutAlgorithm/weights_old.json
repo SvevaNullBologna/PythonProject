@@ -1,0 +1,8 @@
+{
+  "length": 1.0,
+  "diameter": 0.5,
+  "age": 0.2,
+  "num_buds": 0.1,
+  "curvature": 0.3,
+  "cut_threshold": 1.0
+}
