@@ -39,7 +39,7 @@ class BranchEstimator:
                 self.__write_params_on_file(use_old=True)
                 print("starting param's file created")
             else:
-                self.__read_params_on_file(use_old=False)
+                self.__read_params_on_file(use_old=True)
                 print("starting param's file already exists")
         else:
             self.__read_params_on_file(use_old=False)

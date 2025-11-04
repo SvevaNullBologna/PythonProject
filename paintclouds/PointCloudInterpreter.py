@@ -21,7 +21,7 @@ class PointCloudInterpreter:
         self.output_file = None
         self.retrieved_data = None
         self.estimator = BranchEstimator()
-        self.estimator.upgrade_parameters()
+        #self.estimator.upgrade_parameters()
 
     def set_base_path(self, basefolder): #importa la cartella principale
         base = Path(basefolder)
