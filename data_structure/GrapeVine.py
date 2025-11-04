@@ -2,7 +2,7 @@ from pathlib import Path
 import json
 from data_structure.Branch import Branch
 
-class Grapevine:
+class GrapeVine:
     def __init__(self):
         self.basefolder = None
         self.tree_elements = []
@@ -65,7 +65,7 @@ class Grapevine:
 
 
 if __name__ == "__main__":
-    g = Grapevine()
+    g = GrapeVine()
     g.set_basefolder(r"C:\Users\Sveva\Desktop\Materiale")
     g.load_grapevine_from_file("dataset 2025-10-09 10-36-06_albero.json")
     print(g)
