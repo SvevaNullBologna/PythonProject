@@ -7,31 +7,31 @@ from paintclouds.PointCloudInterpreter import PointCloudInterpreter
 from BestCutAlgorithm.BranchPruner import BranchPruner
 
 
-def _clean_feedback(feedback: dict) -> dict:
+def _clean_feedback(feedback: dict, use_weights: bool) -> dict:
     """
     Converte il feedback della GUI in un formato numerico
     e traduce le chiavi dall'italiano all'inglese.
     """
-    translation_map = {
+    translation_map_weights = {
         "lunghezza": "length",
         "diametro": "diameter",
         "età": "age",
         "curvatura": "curvature",
         "gemme": "num_buds",
         "soglia taglio": "cut_threshold",
-
-        "raggio outlier": "outlier_radius",
-        "punti vicini": "nb_points",
-        "dimensione voxel": "voxel_size",
-        "min punti": "min_number_points",
-        "punti ramo minimi": "min_points_branch",
-        "soglia curvatura": "curvature_threshold",
-        "scala diametro": "diameter_scale",
-        "fattore età": "age_factor",
-        "fattore lunghezza": "length_factor",
-        "lunghezza gemme": "bud_length_factor",
-        "curvatura gemme": "bud_curvature_factor"
     }
+    translation_map_parameters = {
+        "numero minimo punti outlier": "nb_points",
+        "risoluzione griglia": "voxel_size",
+        "lunghezza": "length_factor",
+        "diametro": "diameter_scale",
+        "età": "age_factor",
+        "curvatura":"curvature_threshold",
+        "gemme per lunghezza": "bud_length_factor",
+        "gemme su curvatura": "bud_curvature_factor"
+    }
+
+    translation_map = translation_map_weights if use_weights else translation_map_parameters
 
     cleaned = {}
     for key, value in feedback.items():
@@ -126,7 +126,7 @@ class TkinterModel(tk.Frame):
         frame.columnconfigure(0, weight=1)
         frame.columnconfigure(1, weight=1)
 
-        attributes = ["lunghezza", "diametro", "età", "curvatura", "gemme"]
+        attributes = ["numero minimo punti outlier", "risoluzione griglia","lunghezza", "diametro", "età", "curvatura", "gemme per lunghezza", "gemme su curvatura"]
         options = ["troppo basso", "ok", "troppo alto"]
 
         # Errori di stima
@@ -157,8 +157,8 @@ class TkinterModel(tk.Frame):
         # Pulsanti accetta/rifiuta
         button_frame = ttk.Frame(frame)
         button_frame.grid(row=1, column=0, columnspan=2, pady=10)
-        ttk.Button(button_frame, text="Accetta", command=self.accept_feedback).pack(side="left", padx=5)
-        ttk.Button(button_frame, text="Rifiuta", command=self.reject_feedback).pack(side="left", padx=5)
+        ttk.Button(button_frame, text="salva algoritmo attuale", command=self.save_current_algorithm).pack(side="left", padx=5)
+        ttk.Button(button_frame, text="migliora algoritmo", command=self.better_algorithm).pack(side="left", padx=5)
 
 
     def _create_save_frame(self):
@@ -203,6 +203,23 @@ class TkinterModel(tk.Frame):
             "cut_threshold": w.cut_threshold
         }
         return params, weights
+
+    def refresh_entries(self):
+        # aggiorna le Entry con i valori correnti dell'estimatore e del pruner
+        params, weights = self.update_values()
+        for key, value in params.items():
+            if key in self.entries:
+                self.entries[key].configure(state="normal")
+                self.entries[key].delete(0, tk.END)
+                self.entries[key].insert(0, str(value))
+                self.entries[key].configure(state="readonly")
+
+        for key, value in weights.items():
+            if key in self.entries:
+                self.entries[key].configure(state="normal")
+                self.entries[key].delete(0, tk.END)
+                self.entries[key].insert(0, str(value))
+                self.entries[key].configure(state="readonly")
 
     def get_parameters(self):
         updated = {}
@@ -296,22 +313,21 @@ class TkinterModel(tk.Frame):
         print("Parametri aggiornati:", updated)
         messagebox.showinfo("Salvato", "I nuovi parametri sono stati acquisiti correttamente.")
 
-    def accept_feedback(self):
-        est_feedback = {k: v.get() for k, v in self.feedback_estimation_vars.items()}
-        weight_feedback = {k: v.get() for k, v in self.feedback_weight_vars.items()}
-        print("Feedback accettato")
-        print("Errori stima:", est_feedback)
-        print("Errori peso:", weight_feedback)
-        messagebox.showinfo("Feedback", "Feedback accettato!")
+    def save_current_algorithm(self):
+        print("si sta salvando il nuovo algoritmo")
+        self.pointcloudinterpreter.estimator.promote_new_params()
+        self.pruner.promote_new_weights()
+        messagebox.showinfo("Feedback", "Algoritmo salvato")
 
-    def reject_feedback(self):
+
+    def better_algorithm(self):
         parameters_feedback = {k: v.get() for k, v in self.feedback_estimation_vars.items()}
         weight_feedback = {k: v.get() for k, v in self.feedback_weight_vars.items()}
 
-        parameters_feedback = _clean_feedback(parameters_feedback)
-        weight_feedback = _clean_feedback(weight_feedback)
+        parameters_feedback = _clean_feedback(parameters_feedback, False)
+        weight_feedback = _clean_feedback(weight_feedback, True)
 
-        print("Feedback rifiutato — aggiorno i pesi dell'algoritmo.")
+        print("aggiorno i pesi dell'algoritmo secondo il feedback dato.")
         print("Errori stima:", parameters_feedback)
         print("Errori peso:", weight_feedback)
 
@@ -319,11 +335,13 @@ class TkinterModel(tk.Frame):
         self.pointcloudinterpreter.estimator.calculate_new_parameters(parameters_feedback)
         self.pruner.calculate_new_weights_and_treshold(weight_feedback)
 
+        #update visivo dei parametri e dei pesi
+        self.refresh_entries()
         # reset visivo dei campi feedback
         for var in self.feedback_estimation_vars.values():
             var.set("ok")
         for var in self.feedback_weight_vars.values():
             var.set("ok")
 
-        messagebox.showinfo("Feedback", "Algoritmo aggiornato in base al feedback (rifiuto).")
+        messagebox.showinfo("Feedback", "Algoritmo aggiornato in base al feedback.")
 

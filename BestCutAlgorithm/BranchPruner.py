@@ -27,11 +27,11 @@ class BranchPruner:
                 self.__write_weights_on_file(use_old=True)
                 print("starting weight's file created")
             else:
-                print("starting weight's file already exists")
                 self.__read_weights(use_old=True)
+                print("starting weight's file already exists")
         else:
-            print("starting weight's file already exists")
             self.__read_weights(use_old=False)
+            print("starting weight's file already exists")
 
 
     def __write_weights_on_file(self, use_old : bool):
@@ -59,12 +59,13 @@ class BranchPruner:
         if filename.exists():
             filename.unlink()
 
-    def __promote_new_weights(self):
+    def promote_new_weights(self):
         if not self.new_weight_file.exists() or (os.stat(self.new_weight_file).st_size == 0) :
             print("no new weights file found to promote")
-        else:
-            shutil.move(self.new_weight_file, self.old_weight_file)
-            print(f"new weights promoted to old")
+            return
+
+        shutil.move(self.new_weight_file, self.old_weight_file)
+        print(f"new weights promoted to old")
 
     def calculate_best_cut_from_file(self, interpreted_supervisely: str):
         gv = GrapeVine()

@@ -18,9 +18,9 @@ class BranchEstimator:
 
         self.diameter_scale = 2
 
-        self.age_factor = 25.0
+        self.age_factor = 5.0
         self.length_factor = 2.5
-        self.bud_length_factor = 15.0
+        self.bud_length_factor = 10.0
         self.bud_curvature_factor = 0.8
 
         # if file does not exist, create branch_parameters_old and write data -> starting point
@@ -80,12 +80,13 @@ class BranchEstimator:
         if filename.exists():
             filename.unlink()
 
-    def __promote_new_weights(self):
+    def promote_new_params(self):
         if not self.new_param_file.exists() or (os.stat(self.new_param_file).st_size == 0) :
             print("no new parameters file found to promote")
-        else:
-            shutil.move(self.new_param_file, self.old_param_file)
-            print(f"new parameters promoted to old")
+            return
+
+        shutil.move(self.new_param_file, self.old_param_file)
+        print(f"new parameters promoted to old")
 
     """
         FOR THE ALGORITHM ESTIMATING LENGTH, DIAMETER, AGE, ECC... 
