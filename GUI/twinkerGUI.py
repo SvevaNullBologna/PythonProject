@@ -1,7 +1,7 @@
 import tkinter as tk
 from paintclouds.PointCloudInterpreter import PointCloudInterpreter
 from BestCutAlgorithm.BranchPruner import BranchPruner
-from GUI.tkinterModel import tkinterModel
+from GUI.tkinterModel import TkinterModel
 
 # Crea le istanze dei tuoi oggetti
 pointcloudinterpreter = PointCloudInterpreter()
@@ -13,7 +13,7 @@ root.title("Parametri Branch Estimator & Pruner")
 root.geometry("500x800")
 
 # Crea e aggiungi il frame
-gui = tkinterModel(root, pointcloudinterpreter, pruner)
+gui = TkinterModel(root, pointcloudinterpreter, pruner)
 gui.pack(fill="both", expand=True, padx=10, pady=10)
 
 # Avvia il loop principale di Tkinter

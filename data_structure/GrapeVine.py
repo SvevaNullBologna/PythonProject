@@ -30,6 +30,7 @@ class GrapeVine:
 
         json_file = self._retrieve_json_file_(filename)
         if not json_file:
+            print(f"Errore, no json file: {filename}")
             return
         try:
             with open(json_file, "r") as f:

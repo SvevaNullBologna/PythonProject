@@ -74,7 +74,7 @@ class BranchPruner:
     def calculate_best_cut(self, grapevine: GrapeVine ):
         branches_to_cut = []
         for branch in grapevine.tree_elements:
-            if branch.classTitle != "tree":
+            if branch.classTitle != "Tree":
                 branch.score = self._calculate_branch_score(branch)
                 if branch.score >= self.cut_threshold :
                     branches_to_cut.append(branch)
