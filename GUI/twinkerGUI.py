@@ -10,7 +10,7 @@ pruner = BranchPruner()
 # Crea la finestra principale
 root = tk.Tk()
 root.title("Parametri Branch Estimator & Pruner")
-root.geometry("600x600")
+root.geometry("500x800")
 
 # Crea e aggiungi il frame
 gui = tkinterModel(root, pointcloudinterpreter, pruner)

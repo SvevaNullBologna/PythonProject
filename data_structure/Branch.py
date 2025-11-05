@@ -10,6 +10,7 @@ class Branch:
         self.main_axis = main_axis
         self.numPoints = numPoints
         self.points = points
+        self.score = 0
 
     def __str__(self):
         return (
@@ -21,6 +22,6 @@ class Branch:
             f"Curvature: {self.curvature}\n"
             f"Center: {self.center}\n"
             f"Main Axis: {self.main_axis}\n"
-            f"Number of Points: {self.numPoints}"
-            "\n"
+            f"Number of Points: {self.numPoints}\n"
+            f"Score: {self.score}\n"
         )

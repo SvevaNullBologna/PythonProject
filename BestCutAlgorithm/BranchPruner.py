@@ -66,12 +66,18 @@ class BranchPruner:
             shutil.move(self.new_weight_file, self.old_weight_file)
             print(f"new weights promoted to old")
 
+    def calculate_best_cut_from_file(self, interpreted_supervisely: str):
+        gv = GrapeVine()
+        gv.load_grapevine_from_file(interpreted_supervisely)
+        return self.calculate_best_cut(gv)
 
     def calculate_best_cut(self, grapevine: GrapeVine ):
         branches_to_cut = []
         for branch in grapevine.tree_elements:
-            if branch.classTitle != "tree" and self._calculate_branch_score(branch) >= self.cut_threshold :
-                branches_to_cut.append(branch)
+            if branch.classTitle != "tree":
+                branch.score = self._calculate_branch_score(branch)
+                if branch.score >= self.cut_threshold :
+                    branches_to_cut.append(branch)
         return branches_to_cut
 
     def _calculate_branch_score(self, branch: Branch):
