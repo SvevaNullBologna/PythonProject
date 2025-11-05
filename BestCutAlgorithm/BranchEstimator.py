@@ -87,10 +87,6 @@ class BranchEstimator:
             shutil.move(self.new_param_file, self.old_param_file)
             print(f"new parameters promoted to old")
 
-
-    def evolve_parameters(self):
-        pass
-
     """
         FOR THE ALGORITHM ESTIMATING LENGTH, DIAMETER, AGE, ECC... 
     """
@@ -209,18 +205,26 @@ class BranchEstimator:
                 "center": center.tolist(),
                 "main_axis": main_axis.tolist()}
 
-"""
-    for test reasons
-    
-def test_branch_estimator():
-    print("\n=== Testing BranchEstimator ===")
-    be = BranchEstimator()
-    print("Parameters loaded:")
-    for k, v in be.__dict__.items():
-        if not k.startswith("_"):
-            print(f"  {k}: {v}")
+    def calculate_new_parameters(self, parameters_feedback):
+        """
+        Aggiorna i parametri dell'estimatore in base al feedback.
+        parameters_feedback: dict con chiavi già tradotte e valori numerici (-1,0,1)
+        """
+        print("Feedback ricevuto per aggiornamento parametri:", parameters_feedback)
 
-if __name__ == "__main__":
-    test_branch_estimator()
+        # coefficiente di aggiornamento (quanto modificare i parametri)
+        learning_rate = 0.05
 
-"""
+        for key, delta in parameters_feedback.items():
+            if hasattr(self, key):
+                current_value = getattr(self, key)
+                if current_value is not None:
+                    # aggiorna il parametro moltiplicando per un piccolo delta relativo
+                    new_value = current_value * (1 + delta * learning_rate)
+                    # limiti ragionevoli per evitare valori negativi o eccessivi
+                    if isinstance(current_value, (int, float)):
+                        new_value = max(0.0, new_value)
+                    setattr(self, key, new_value)
+
+        # Scrive i nuovi parametri su file
+        self.__write_params_on_file(use_old=False)

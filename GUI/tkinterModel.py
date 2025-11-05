@@ -7,6 +7,48 @@ from paintclouds.PointCloudInterpreter import PointCloudInterpreter
 from BestCutAlgorithm.BranchPruner import BranchPruner
 
 
+def _clean_feedback(feedback: dict) -> dict:
+    """
+    Converte il feedback della GUI in un formato numerico
+    e traduce le chiavi dall'italiano all'inglese.
+    """
+    translation_map = {
+        "lunghezza": "length",
+        "diametro": "diameter",
+        "età": "age",
+        "curvatura": "curvature",
+        "gemme": "num_buds",
+        "soglia taglio": "cut_threshold",
+
+        "raggio outlier": "outlier_radius",
+        "punti vicini": "nb_points",
+        "dimensione voxel": "voxel_size",
+        "min punti": "min_number_points",
+        "punti ramo minimi": "min_points_branch",
+        "soglia curvatura": "curvature_threshold",
+        "scala diametro": "diameter_scale",
+        "fattore età": "age_factor",
+        "fattore lunghezza": "length_factor",
+        "lunghezza gemme": "bud_length_factor",
+        "curvatura gemme": "bud_curvature_factor"
+    }
+
+    cleaned = {}
+    for key, value in feedback.items():
+        eng_key = translation_map.get(key)
+        if not eng_key:
+            continue  # ignora chiavi sconosciute
+
+        if value == "troppo alto":
+            cleaned[eng_key] = -1
+        elif value == "troppo basso":
+            cleaned[eng_key] = 1
+        else:
+            cleaned[eng_key] = 0
+
+    return cleaned
+
+
 class TkinterModel(tk.Frame):
     def __init__(self, master, pointcloudinterpreter: PointCloudInterpreter, pruner: BranchPruner):
         super().__init__(master)
@@ -102,7 +144,10 @@ class TkinterModel(tk.Frame):
         weight_frame = ttk.LabelFrame(frame, text="Errori nel calcolo del taglio")
         weight_frame.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
 
-        for i, attr in enumerate(attributes):
+        # 👇 Aggiungo anche il valore di soglia al feedback dei pesi
+        weight_attributes = ["lunghezza", "diametro", "età", "curvatura", "gemme", "soglia taglio"]
+
+        for i, attr in enumerate(weight_attributes):
             ttk.Label(weight_frame, text=attr).grid(row=i, column=0, sticky="w")
             var = tk.StringVar(value="ok")
             self.feedback_weight_vars[attr] = var
@@ -114,6 +159,7 @@ class TkinterModel(tk.Frame):
         button_frame.grid(row=1, column=0, columnspan=2, pady=10)
         ttk.Button(button_frame, text="Accetta", command=self.accept_feedback).pack(side="left", padx=5)
         ttk.Button(button_frame, text="Rifiuta", command=self.reject_feedback).pack(side="left", padx=5)
+
 
     def _create_save_frame(self):
         frame = ttk.Frame(self, padding=10)
@@ -128,6 +174,7 @@ class TkinterModel(tk.Frame):
             ttk.Label(frame, text=key).grid(row=i, column=0, sticky="w", padx=5, pady=2)
             entry = ttk.Entry(frame, width=12)
             entry.insert(0, str(value))
+            entry.configure(state="readonly")
             entry.grid(row=i, column=1, padx=5, pady=2)
             self.entries[key] = entry
 
@@ -258,8 +305,25 @@ class TkinterModel(tk.Frame):
         messagebox.showinfo("Feedback", "Feedback accettato!")
 
     def reject_feedback(self):
+        parameters_feedback = {k: v.get() for k, v in self.feedback_estimation_vars.items()}
+        weight_feedback = {k: v.get() for k, v in self.feedback_weight_vars.items()}
+
+        parameters_feedback = _clean_feedback(parameters_feedback)
+        weight_feedback = _clean_feedback(weight_feedback)
+
+        print("Feedback rifiutato — aggiorno i pesi dell'algoritmo.")
+        print("Errori stima:", parameters_feedback)
+        print("Errori peso:", weight_feedback)
+
+        # 👉 chiama il metodo del BranchPruner
+        self.pointcloudinterpreter.estimator.calculate_new_parameters(parameters_feedback)
+        self.pruner.calculate_new_weights_and_treshold(weight_feedback)
+
+        # reset visivo dei campi feedback
         for var in self.feedback_estimation_vars.values():
             var.set("ok")
         for var in self.feedback_weight_vars.values():
             var.set("ok")
-        messagebox.showinfo("Feedback", "Feedback resettato!")
+
+        messagebox.showinfo("Feedback", "Algoritmo aggiornato in base al feedback (rifiuto).")
+

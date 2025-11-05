@@ -87,10 +87,28 @@ class BranchPruner:
             score += weight * value
         return score
 
+    def calculate_new_weights_and_treshold(self, weight_feedback):
+        """
+        Aggiorna i pesi e la soglia di taglio in base al feedback.
+        weight_feedback: dict con chiavi già tradotte e valori numerici (-1,0,1)
+        """
+        print("Feedback ricevuto per aggiornamento pesi:", weight_feedback)
 
-    def calculate_new_weights_and_treshold(self):
-        pass
+        # coefficiente di aggiornamento (quanto modificare i pesi)
+        learning_rate = 0.05
+
+        for key, delta in weight_feedback.items():
+            if key == "cut_threshold":
+                # Aggiorno la soglia di taglio direttamente
+                self.cut_threshold += delta * learning_rate
+                # limito la soglia a valori sensati
+                self.cut_threshold = max(0.0, self.cut_threshold)
+            elif key in self.weights:
+                self.weights[key] += delta * learning_rate
+                # limito i pesi a valori >= 0
+                self.weights[key] = max(0.0, self.weights[key])
+
+        # Scrivo le nuove configurazioni su file
+        self.__write_weights_on_file(use_old=False)
 
 
-if __name__ == "__main__":
-    bp = BranchPruner()
