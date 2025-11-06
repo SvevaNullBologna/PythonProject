@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             } else {
                 alert("Errore: " + data.message); // avviso negativo
                 exportTxt.value = "";
-                }
+            }
         } catch (err) {
             console.error(err);
             alert("Errore di connessione al server");
@@ -142,20 +142,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     const saveBtn = document.getElementById("save-AI");
 
     // Funzione per leggere i feedback selezionati
-    function getFeedback(containerSelector) {
+    function getFeedback(selector) {
         const feedback = {};
-        const container = document.querySelector(containerSelector);
-        if (!container) return feedback;
-
-        container.querySelectorAll("li").forEach(li => {
-            const input = li.querySelector("input[type=radio]:checked");
+        document.querySelectorAll(`${selector} li`).forEach(li => {
+            const input = li.querySelector("input:checked");
             if (input) {
-                // usa il name dell'input come chiave e value come valore
-                feedback[input.name] = parseInt(input.value, 10);
+                feedback[input.name] = parseInt(input.value);
             }
         });
         return feedback;
+
     }
+
 
     upgradeBtn.addEventListener("click", async () => {
         const parametersFeedback = getFeedback("#parameters-feedback");
@@ -171,7 +169,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                 })
             });
             const data = await res.json();
-            if (data.status === "updated") {
+            if (data.status === "ok") {
+                displayTable("#params-container", data.parameters);
+                displayTable("#weights-container", data.weights);
                 alert("AI aggiornata correttamente!");
             } else {
                 alert("Errore aggiornamento AI");
@@ -181,6 +181,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             alert("Errore di connessione al server");
         }
     });
+
+
+
 
     saveBtn.addEventListener("click", async () => {
         try {
@@ -200,3 +203,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 });
+

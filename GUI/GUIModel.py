@@ -51,8 +51,10 @@ class ModelBackend:
                 cleaned[eng_key] = -1
             elif value == "troppo basso":
                 cleaned[eng_key] = 1
-            else:
+            elif value == "ok":
                 cleaned[eng_key] = 0
+            else:
+                cleaned[eng_key] = value
         return cleaned
 
     # -------------------
@@ -150,13 +152,19 @@ class ModelBackend:
         self.pruner.promote_new_weights()
         return {"status": "ok"}
 
-    def better_algorithm(self, parameters_feedback: dict, weight_feedback: dict):
+    def better_algorithm_with_clean(self, parameters_feedback: dict, weight_feedback: dict):
         parameters_feedback = self._clean_feedback(parameters_feedback, use_weights=False)
         weight_feedback = self._clean_feedback(weight_feedback, use_weights=True)
 
         self.pointcloudinterpreter.estimator.calculate_new_parameters(parameters_feedback)
         self.pruner.calculate_new_weights_and_treshold(weight_feedback)
         return {"status": "ok", "parameters_feedback": parameters_feedback, "weight_feedback": weight_feedback}
+
+    def better_algorithm(self, parameters_feedback: dict, weight_feedback: dict):
+        self.pointcloudinterpreter.estimator.calculate_new_parameters(parameters_feedback)
+        self.pruner.calculate_new_weights_and_treshold(weight_feedback)
+        return {"status": "ok", "parameters_feedback": parameters_feedback, "weight_feedback": weight_feedback}
+
 
     def get_cut_document(self):
         if self.current_grapevine:

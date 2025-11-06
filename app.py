@@ -64,8 +64,27 @@ def show_dataset():
 @app.route("/update_algorithm", methods=["POST"])
 def update_algorithm():
     feedback = request.json or {}
-    model.better_algorithm(feedback.get("estimation", {}), feedback.get("weights", {}))
-    return jsonify({"status": "updated"})
+    result = model.better_algorithm(feedback.get("estimation", {}), feedback.get("weights", {}))
+
+    # Prendi i valori aggiornati reali
+    estimator = model.pointcloudinterpreter.estimator
+    pruner = model.pruner
+
+    updated_params = {k: getattr(estimator, k) for k in [
+        "outlier_radius", "nb_points", "voxel_size",
+        "min_number_points", "min_points_branch", "curvature_threshold",
+        "diameter_scale", "age_factor", "length_factor",
+        "bud_length_factor", "bud_curvature_factor"
+    ]}
+
+    updated_weights = {**pruner.weights, "cut_threshold": pruner.cut_threshold}
+
+    return jsonify({
+        "status": "ok",
+        "parameters": updated_params,
+        "weights": updated_weights
+    })
+
 
 @app.route("/save_algorithm", methods=["POST"])
 def save_algorithm():
