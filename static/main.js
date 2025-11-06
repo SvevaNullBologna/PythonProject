@@ -137,4 +137,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         URL.revokeObjectURL(url);
     });
 
+    const exportBtn = document.getElementById("export-cut");
+
+    exportBtn.addEventListener("click", async () => {
+        try {
+            const res = await fetch("/export_cut", { method: "POST" });
+            const data = await res.json();
+            if (data.status === "ok") {
+                alert(data.message); // avviso positivo con path
+            } else {
+                alert("Errore: " + data.message); // avviso negativo
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Errore di connessione al server");
+        }
+    });
+
+
 });

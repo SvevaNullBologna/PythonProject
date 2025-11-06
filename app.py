@@ -72,11 +72,29 @@ def save_algorithm():
     model.save_algorithm()
     return jsonify({"status": "saved"})
 
+@app.route("/export_cut", methods=["POST"])
+def export_cut():
+    try:
+        if not model.current_grapevine or not model.branches_to_cut:
+            return jsonify({
+                "status": "error",
+                "message": "Nessun taglio calcolato. Premi prima 'Calcola taglio'."
+            })
 
+        # crea il file di output
+        output_file = model.output_path / f"{model.current_grapevine.source_filename}_cut.txt"
+        branches = model.pruner.print_best_cut(model.current_grapevine, model.branches_to_cut)
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write("\n".join(branches))
 
-@app.route("/cut_document", methods=["GET"])
-def cut_document():
-    return jsonify(model.get_cut_document())
+        return jsonify({
+            "status": "ok",
+            "message": f"File salvato in: {output_file}"
+        })
+    except Exception as e:
+        print(e)
+        return jsonify({"status": "error", "message": str(e)})
+
 
 if __name__ == "__main__":
     app.run(debug=True)
