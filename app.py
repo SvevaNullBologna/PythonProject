@@ -46,12 +46,20 @@ def get_params_weights():
         # anche se non è stato caricato nessun dataset
         return jsonify({"error": str(e)}), 500
 
-@app.route("/dataset/<int:index>", methods=["GET"])
-def show_dataset(index):
+@app.route("/show_dataset")
+def show_dataset():
+    index = request.args.get("index", default=None, type=int)
     try:
-        return jsonify(model.show_dataset(index))
+        if index is None:
+            index = model.current_json_index
+        data = model.show_dataset(index)
+        if "error" in data:
+            return jsonify({"status": "error", "message": data["error"]})
+        return jsonify({"status": "ok", "branches": data["branches"], "file": data["file"]})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(e)
+        return jsonify({"status": "error", "message": str(e)})
+
 
 @app.route("/update_algorithm", methods=["POST"])
 def update_algorithm():
@@ -64,9 +72,10 @@ def save_algorithm():
     model.save_algorithm()
     return jsonify({"status": "saved"})
 
+
+
 @app.route("/cut_document", methods=["GET"])
 def cut_document():
-    # ritorna il documento reale dei rami da tagliare
     return jsonify(model.get_cut_document())
 
 if __name__ == "__main__":

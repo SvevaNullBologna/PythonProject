@@ -71,13 +71,19 @@ class ModelBackend:
             self.output_path = self.pointcloudinterpreter.output_folder
             self.json_files = sorted(self.output_path.glob("*_albero.json"))
             self.current_json_index = 0
+
+            if self.json_files:
+                # carica il primo dataset subito
+                self.current_grapevine.set_basefolder(self.output_path.parent)
+                self.current_grapevine.load_grapevine_from_file(self.json_files[0].name)
+                self.branches_to_cut = self.pruner.calculate_best_cut(self.current_grapevine)
+
             return {"status": "ok", "num_files": len(self.json_files)}
         else:
             return {"status": "error", "error message": "non è stato selezionato alcun basefolder valido"}
 
     def reset_current_dataset(self):
         self.branches_to_cut = None
-        self.current_grapevine = None
         self.current_json_index = 0
 
     def list_datasets(self):

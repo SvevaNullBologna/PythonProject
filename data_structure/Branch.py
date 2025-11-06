@@ -25,3 +25,17 @@ class Branch:
             f"Number of Points: {self.numPoints}\n"
             f"Score: {self.score}\n"
         )
+
+    def to_dict(self):
+        return {
+            "classTitle": self.classTitle,
+            "length": self.length,
+            "diameter": self.diameter,
+            "age": self.age,
+            "num_buds": self.num_buds,
+            "curvature": self.curvature,
+            "center": self.center,
+            "main_axis": self.main_axis,
+            "numPoints": self.numPoints,
+            "Score": self.score
+        }

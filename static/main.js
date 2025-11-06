@@ -98,4 +98,43 @@ document.addEventListener("DOMContentLoaded", async () => {
             alert("Errore di connessione al backend");
         }
     });
+
+    const computeBtn = document.getElementById("compute-cut");
+    const saveBtn = document.getElementById("save-cut");
+    const outputArea = document.getElementById("branches-output");
+
+    computeBtn.addEventListener("click", async () => {
+        try {
+            const res = await fetch("/show_dataset");  // ← cambiato qui
+            const data = await res.json();
+            if (data.status === "error") {
+                outputArea.value = "Errore: " + data.message;
+            } else {
+                outputArea.value = data.branches.join("\n");
+            }
+        } catch (err) {
+            console.error("Errore di connessione:", err);
+            outputArea.value = "Errore di connessione al server.";
+        }
+    });
+
+
+    // --- Salvataggio risultati ---
+    saveBtn.addEventListener("click", () => {
+        if (!outputArea.value) {
+            alert("Nessun risultato da salvare!");
+            return;
+        }
+
+        const blob = new Blob([outputArea.value], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "cut_branches.txt";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+
 });
