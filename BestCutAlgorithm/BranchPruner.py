@@ -117,6 +117,7 @@ class BranchPruner:
         self.__write_weights_on_file(use_old=False)
 
     def print_best_cut(self, grapevine: GrapeVine, branches_to_cut):
+        print("trying to print best cut!")
         if not grapevine.source_filename:
             print("Impossibile salvare: filename sorgente non disponibile")
             return

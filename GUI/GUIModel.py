@@ -161,6 +161,8 @@ class ModelBackend:
     def get_cut_document(self):
         if self.current_grapevine:
             branches = self.pruner.print_best_cut(self.current_grapevine, self.branches_to_cut)
-            return {"branches": branches}
+            print("get_cut_document on work")
+            return {"branches": branches, "path": str(self.pruner.best_cut_dir / self.current_grapevine.source_filename) }
         else :
-            return {"status" : "error"}
+            print("current grapevine is None")
+            return {"status" : "error", "message": "Nessun ramo da asportare", "path": ""}

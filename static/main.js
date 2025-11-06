@@ -100,7 +100,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     const computeBtn = document.getElementById("compute-cut");
-    const saveBtn = document.getElementById("save-cut");
     const outputArea = document.getElementById("branches-output");
 
     computeBtn.addEventListener("click", async () => {
@@ -118,41 +117,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
-
-    // --- Salvataggio risultati ---
-    saveBtn.addEventListener("click", () => {
-        if (!outputArea.value) {
-            alert("Nessun risultato da salvare!");
-            return;
-        }
-
-        const blob = new Blob([outputArea.value], { type: "text/plain;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "cut_branches.txt";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    });
-
     const exportBtn = document.getElementById("export-cut");
+    const exportTxt = document.getElementById("cut-path")
 
     exportBtn.addEventListener("click", async () => {
         try {
             const res = await fetch("/export_cut", { method: "POST" });
             const data = await res.json();
             if (data.status === "ok") {
-                alert(data.message); // avviso positivo con path
+                exportTxt.value = data.path; // ← qui metti il path assoluto
             } else {
                 alert("Errore: " + data.message); // avviso negativo
-            }
+                exportTxt.value = "";
+                }
         } catch (err) {
             console.error(err);
             alert("Errore di connessione al server");
+            exportTxt.value = "";
         }
     });
-
 
 });

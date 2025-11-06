@@ -150,7 +150,7 @@ h2 {
 
 #basefolder-path {
     width: 100%;
-    padding: 6px;
+    padding: 10px;
     border: 1px solid #ccc;
     border-radius: 6px;
     background-color: #fdfdfd;
@@ -186,6 +186,19 @@ button:hover {
 button:active {
     transform: scale(0.97);
 }
+
+#calculate-cut .export-container {
+    margin-top: 15px;       /* spazio sopra l'input */
+}
+
+#cut-path {
+    width: 100%;            /* occupa tutta la larghezza */
+    padding: 8px;
+    font-size: 0.95rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
 
 /* ===============================
    TEXTAREA E OUTPUT

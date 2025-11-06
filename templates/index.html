@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BranchPruners AI – Potatura Sostenibile del Vigneto</title>
-    <link rel="stylesheet" href="static\style.css">
+    <link rel="stylesheet" href="../static/style.css">
     <link rel="icon"
           href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🌿</text></svg>">
-    <script defer src="static\main.js"></script>
+    <script defer src="../static/main.js"></script>
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -71,6 +71,12 @@
                 <button id="compute-cut"><i class="fas fa-seedling"></i> Calcola taglio</button>
                 <button id="export-cut"><i class="fas fa-print"></i> Esporta risultati</button>
             </div>
+
+            <div class="export-container">
+                <label for="cut-path">Percorso file esportato:</label>
+                <input type="text" id="cut-path" readonly placeholder="Il percorso apparirà qui dopo l’esportazione">
+            </div>
+
         </section>
 
         <!-- SUPERVISIONAMENTO AI -->

@@ -81,18 +81,18 @@ def export_cut():
                 "message": "Nessun taglio calcolato. Premi prima 'Calcola taglio'."
             })
 
-        # crea il file di output
-        output_file = model.output_path / f"{model.current_grapevine.source_filename}_cut.txt"
-        branches = model.pruner.print_best_cut(model.current_grapevine, model.branches_to_cut)
-        with open(output_file, "w", encoding="utf-8") as f:
-            f.write("\n".join(branches))
+        # Fa già tutto il pruner
+        model.pruner.print_best_cut(model.current_grapevine, model.branches_to_cut)
+
+        output_file = model.pruner.best_cut_dir / model.current_grapevine.source_filename
 
         return jsonify({
             "status": "ok",
-            "message": f"File salvato in: {output_file}"
+            "message": f"File JSON salvato in: {output_file}",
+            "path": str(output_file.resolve())
         })
     except Exception as e:
-        print(e)
+        print("Errore durante l’esportazione:", e)
         return jsonify({"status": "error", "message": str(e)})
 
 
