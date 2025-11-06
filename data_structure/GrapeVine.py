@@ -6,6 +6,7 @@ class GrapeVine:
     def __init__(self):
         self.basefolder = None
         self.tree_elements = []
+        self.source_filename = None
 
     def set_basefolder(self, basefolder):
         folder = Path(basefolder)/ "output"
@@ -38,6 +39,8 @@ class GrapeVine:
         except json.JSONDecodeError as e :
             print(f"Errore nel parsing del JSON {json_file.name}: {e}")
             return
+
+        self.source_filename = json_file.name
 
         branches = data.get("branches",[])
 

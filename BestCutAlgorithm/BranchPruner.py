@@ -7,8 +7,9 @@ import os
 from pathlib import Path
 
 class BranchPruner:
-    def __init__(self, cut_threshold=1.0):
-        self.cut_threshold = cut_threshold
+    def __init__(self, result_folder = None):
+        self.project_root = Path(__file__).resolve().parents[1]
+        self.cut_threshold = 1.0
         self.weights = {
             "length": 1.0,
             "diameter": 0.5,
@@ -17,8 +18,16 @@ class BranchPruner:
             "curvature": 0.3
         }
 
-        self.old_weight_file = Path(r"C:\Users\Sveva\PycharmProjects\PythonProject\BestCutAlgorithm\weights_old.json")
-        self.new_weight_file = Path(r"C:\Users\Sveva\PycharmProjects\PythonProject\BestCutAlgorithm\weights_new.json")
+        self.old_weight_file = Path(self.project_root / "BestCutAlgorithm" / "weights_old.json")
+        self.new_weight_file = Path(self.project_root / "BestCutAlgorithm" / "weights_new.json")
+
+        if result_folder and result_folder.is_dir():
+            self.best_cut_dir = Path(result_folder / "BestCutAlgorithm")
+        else:
+            self.best_cut_dir = self.project_root / "ResultingCuts"
+
+        self.best_cut_dir.mkdir(exist_ok=True)
+
         self.__set_starting_weights()
 
     def __set_starting_weights(self):
@@ -67,11 +76,6 @@ class BranchPruner:
         shutil.move(self.new_weight_file, self.old_weight_file)
         print(f"new weights promoted to old")
 
-    def calculate_best_cut_from_file(self, interpreted_supervisely: str):
-        gv = GrapeVine()
-        gv.load_grapevine_from_file(interpreted_supervisely)
-        return self.calculate_best_cut(gv)
-
     def calculate_best_cut(self, grapevine: GrapeVine ):
         branches_to_cut = []
         for branch in grapevine.tree_elements:
@@ -111,5 +115,20 @@ class BranchPruner:
 
         # Scrivo le nuove configurazioni su file
         self.__write_weights_on_file(use_old=False)
+
+    def print_best_cut(self, grapevine: GrapeVine, branches_to_cut):
+        if not grapevine.source_filename:
+            print("Impossibile salvare: filename sorgente non disponibile")
+            return
+        output_filename = self.best_cut_dir / grapevine.source_filename
+        data = {
+            "branches_to_cut": [branch.to_dict() for branch in branches_to_cut]
+        }
+
+        with open(output_filename, "w") as f:
+            json.dump(data, f, indent=2)
+        print(f"Best cut salvato in {output_filename}")
+
+
 
 

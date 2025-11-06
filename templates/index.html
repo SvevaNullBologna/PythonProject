@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BranchPruners AI – Potatura Sostenibile del Vigneto</title>
+    <link rel="stylesheet" href="static\style.css">
+    <link rel="icon"
+          href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🌿</text></svg>">
+    <script defer src="static\main.js"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <h1>🌿 BranchPruners AI</h1>
+        <h3>Potatura sostenibile e intelligente per la viticoltura</h3>
+    </header>
+
+    <main>
+        <!-- PARAMETRI -->
+        <section id="show-values" class="card">
+            <div id="params-show">
+                <h2>Parametri per la Misurazione delle Viti</h2>
+                <table class="param-table">
+                    <thead>
+                        <tr><th>Parametro</th><th>Valore</th></tr>
+                    </thead>
+                    <tbody id="params-container">
+                    <!-- Riempito dinamicamente da JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="weights-show">
+                <h2>Pesi Decisionali per il Calcolo del Taglio</h2>
+                <table class="param-table">
+                    <thead>
+                        <tr><th>Peso</th><th>Valore</th></tr>
+                    </thead>
+                    <tbody id="weights-container">
+                    <!-- Riempito dinamicamente da JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+
+        <!-- DATASET -->
+        <section id="dataset-section" class="card">
+            <h2>Dataset Supervisely</h2>
+            <div class="path-container">
+                <label for="basefolder-path"><b>Cartella base:</b></label>
+                <input type="text" id="basefolder-path" placeholder="Copia e incolla il path assoluto">
+                <div class="button-group">
+                    <button id="set-basefolder">Imposta cartella</button>
+                    <button id="load-dataset">Carica dataset</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- CALCOLO TAGLIO -->
+        <section id="calculate-cut" class="card">
+            <h2>Calcolo del Taglio</h2>
+            <p>Carica il dataset e clicca “Calcola taglio” per identificare i rami da potare.</p>
+
+            <textarea id="branches-output" placeholder="Risultati dei rami da tagliare..." readonly></textarea>
+
+            <div class="button-group">
+                <button id="compute-cut"><i class="fas fa-seedling"></i> Calcola taglio</button>
+                <button id="save-cut"><i class="fas fa-file-download"></i> Esporta risultati</button>
+            </div>
+        </section>
+
+        <!-- SUPERVISIONAMENTO AI -->
+        <section id="AI-developing" class="card">
+            <h2>Supervisionamento AI</h2>
+            <p>Fornisci feedback per migliorare l’algoritmo di potatura automatica.</p>
+
+            <div id="user-feedback">
+                <ul id="positive-feedback">
+                    <!-- feedback positivi -->
+                </ul>
+                <ul id="negative-feedback">
+                    <!-- feedback negativi -->
+                </ul>
+            </div>
+
+            <div class="button-group">
+                <button id="upgrade-AI"><i class="fas fa-brain"></i> Migliora AI</button>
+                <button id="save-AI"><i class="fas fa-save"></i> Salva algoritmo</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 BranchPruners AI – Progetto di Potatura Sostenibile</p>
+    </footer>
+</body>
+</html>

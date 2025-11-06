@@ -24,8 +24,9 @@ class BranchEstimator:
         self.bud_curvature_factor = 0.8
 
         # if file does not exist, create branch_parameters_old and write data -> starting point
-        self.old_param_file = Path(r"C:\Users\Sveva\PycharmProjects\PythonProject\BestCutAlgorithm\branch_parameters_old.json")
-        self.new_param_file = Path(r"C:\Users\Sveva\PycharmProjects\PythonProject\BestCutAlgorithm\branch_parameters_new.json")
+        self.project_root = Path(__file__).resolve().parents[1]
+        self.old_param_file = Path(self.project_root / "BestCutAlgorithm" / "branch_parameters_old.json")
+        self.new_param_file = Path(self.project_root / "BestCutAlgorithm" / "branch_parameters_new.json")
         self.__set_starting_parameters_in_json()
 
 
