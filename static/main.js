@@ -137,4 +137,66 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
+    // --- Bottoni AI ---
+    const upgradeBtn = document.getElementById("upgrade-AI");
+    const saveBtn = document.getElementById("save-AI");
+
+    // Funzione per leggere i feedback selezionati
+    function getFeedback(containerSelector) {
+        const feedback = {};
+        const container = document.querySelector(containerSelector);
+        if (!container) return feedback;
+
+        container.querySelectorAll("li").forEach(li => {
+            const input = li.querySelector("input[type=radio]:checked");
+            if (input) {
+                // usa il name dell'input come chiave e value come valore
+                feedback[input.name] = parseInt(input.value, 10);
+            }
+        });
+        return feedback;
+    }
+
+    upgradeBtn.addEventListener("click", async () => {
+        const parametersFeedback = getFeedback("#parameters-feedback");
+        const weightsFeedback = getFeedback("#weights-feedback");
+
+        try {
+            const res = await fetch("/update_algorithm", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    estimation: parametersFeedback,
+                    weights: weightsFeedback
+                })
+            });
+            const data = await res.json();
+            if (data.status === "updated") {
+                alert("AI aggiornata correttamente!");
+            } else {
+                alert("Errore aggiornamento AI");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Errore di connessione al server");
+        }
+    });
+
+    saveBtn.addEventListener("click", async () => {
+        try {
+            const res = await fetch("/save_algorithm", { method: "POST" });
+            const data = await res.json();
+            if (data.status === "saved") {
+                alert("Algoritmo salvato correttamente!");
+            } else {
+                alert("Errore nel salvataggio dell'algoritmo");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Errore di connessione al server");
+        }
+    });
+
+
+
 });

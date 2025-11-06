@@ -85,12 +85,81 @@
             <p>Fornisci feedback per migliorare l’algoritmo di potatura automatica.</p>
 
             <div id="user-feedback">
-                <ul id="positive-feedback">
-                    <!-- feedback positivi -->
-                </ul>
-                <ul id="negative-feedback">
-                    <!-- feedback negativi -->
-                </ul>
+                <div class="feedback-group">
+                    <h3> PARAMETRI PER LA MISURAZIONE DELL'ALBERO </h3>
+                    <ul id="parameters-feedback">
+                        <li>numero minimo punti outlier
+                            <label><input type="radio" name="nb_points" value="-1"> Troppo basso</label>
+                            <label><input type="radio" name="nb_points" value="0" checked> OK</label>
+                            <label><input type="radio" name="nb_points" value="1"> Troppo alto</label>
+                        </li>
+                        <li>risoluzione griglia
+                            <label><input type="radio" name="voxel_size" value="-1"> Troppo basso</label>
+                            <label><input type="radio" name="voxel_size" value="0" checked> OK</label>
+                            <label><input type="radio" name="voxel_size" value="1"> Troppo alto</label>
+                        </li>
+                        <li>lunghezza
+                            <label><input type="radio" name="length_factor" value="-1"> Troppo basso</label>
+                            <label><input type="radio" name="length_factor" value="0" checked> OK</label>
+                            <label><input type="radio" name="length_factor" value="1"> Troppo alto</label>
+                        </li>
+                        <li>diametro
+                            <label><input type="radio" name="diameter_factor" value="-1"> Troppo basso</label>
+                            <label><input type="radio" name="diameter_factor" value="0" checked> OK</label>
+                            <label><input type="radio" name="diameter_factor" value="1"> Troppo alto</label></li>
+                        <li>età
+                            <label><input type="radio" name="age_factor" value="-1"> Troppo basso</label>
+                            <label><input type="radio" name="age_factor" value="0" checked> OK</label>
+                            <label><input type="radio" name="age_factor" value="1"> Troppo alto</label></li>
+                        <li>curvatura
+                            <label><input type="radio" name="curvature_threshold" value="-1"> Troppo basso</label>
+                            <label><input type="radio" name="curvature_threshold" value="0" checked> OK</label>
+                            <label><input type="radio" name="curvature_threshold" value="1"> Troppo alto</label></li>
+                        <li>gemme per lunghezza
+                            <label><input type="radio" name="bud_length_factor" value="-1"> Troppo basso</label>
+                            <label><input type="radio" name="bud_length_factor" value="0" checked> OK</label>
+                            <label><input type="radio" name="bud_length_factor" value="1"> Troppo alto</label></li>
+                        <li>gemme per curvatura
+                            <label><input type="radio" name="bud_curvature_factor" value="-1"> Troppo basso</label>
+                            <label><input type="radio" name="bud_curvature_factor" value="0" checked> OK</label>
+                            <label><input type="radio" name="bud_curvature_factor" value="1"> Troppo alto</label></li>
+                        </ul>
+                    </div>
+                    <div class="feedback-group">
+                        <h3> PESI DECISIONALI PER IL CALCOLO DEL TAGLIO </h3>
+                        <ul id="weights-feedback">
+                        <li>lunghezza
+                            <label><input type="radio" name="length" value="-1"> Troppo basso</label>
+                            <label><input type="radio" name="length" value="0" checked> OK</label>
+                            <label><input type="radio" name="length" value="1"> Troppo alto</label>
+                        </li>
+                        <li>diametro
+                            <label><input type="radio" name="diameter" value="-1"> Troppo basso</label>
+                            <label><input type="radio" name="diameter" value="0" checked> OK</label>
+                            <label><input type="radio" name="diameter" value="1"> Troppo alto</label>
+                        </li>
+                        <li>età
+                            <label><input type="radio" name="age" value="-1"> Troppo basso</label>
+                            <label><input type="radio" name="age" value="0" checked> OK</label>
+                            <label><input type="radio" name="age" value="1"> Troppo alto</label>
+                        </li>
+                        <li>curvatura
+                            <label><input type="radio" name="curvature" value="-1"> Troppo basso</label>
+                            <label><input type="radio" name="curvature" value="0" checked> OK</label>
+                            <label><input type="radio" name="curvature" value="1"> Troppo alto</label>
+                        </li>
+                        <li>gemme
+                            <label><input type="radio" name="num_buds" value="-1"> Troppo basso</label>
+                            <label><input type="radio" name="num_buds" value="0" checked> OK</label>
+                            <label><input type="radio" name="num_buds" value="1"> Troppo alto</label>
+                        </li>
+                        <li>soglia taglio
+                            <label><input type="radio" name="cut_threshold" value="-1"> Troppo basso</label>
+                            <label><input type="radio" name="cut_threshold" value="0" checked> OK</label>
+                            <label><input type="radio" name="cut_threshold" value="1"> Troppo alto</label>
+                        </li>
+                        </ul>
+                    </div>
             </div>
 
             <div class="button-group">
