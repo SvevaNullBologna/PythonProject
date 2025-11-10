@@ -78,7 +78,7 @@ class ModelBackend:
                 # carica il primo dataset subito
                 self.current_grapevine.set_basefolder(self.output_path.parent)
                 self.current_grapevine.load_grapevine_from_file(self.json_files[0].name)
-                self.branches_to_cut = self.pruner.calculate_best_cut(self.current_grapevine)
+                # self.branches_to_cut = self.pruner.calculate_best_cut(self.current_grapevine)
 
             return {"status": "ok", "num_files": len(self.json_files)}
         else:
@@ -103,6 +103,8 @@ class ModelBackend:
         self.current_grapevine.load_grapevine_from_file(filepath.name)
 
         self.branches_to_cut = self.pruner.calculate_best_cut(self.current_grapevine)
+        if not self.branches_to_cut or len(self.branches_to_cut) <= 0 :
+            return { "file": filepath.name, "branches": [], "message": "nessun ramo da tagliare" }
         branches_str = []
         for b in self.branches_to_cut:
             branches_str.append(str(b))

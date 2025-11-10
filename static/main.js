@@ -108,7 +108,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             const data = await res.json();
             if (data.status === "error") {
                 outputArea.value = "Errore: " + data.message;
-            } else {
+            } else if(!data.branches || data.branches.length === 0){
+                outputArea.value = data.message || "Nessun ramo da tagliare ";
+            }
+            else {
                 outputArea.value = data.branches.join("\n");
             }
         } catch (err) {

@@ -9,13 +9,21 @@ from pathlib import Path
 class BranchPruner:
     def __init__(self, result_folder = None):
         self.project_root = Path(__file__).resolve().parents[1]
-        self.cut_threshold = 1.0
+        self.cut_threshold = 0.1
         self.weights = {
             "length": 1.0,
             "diameter": 0.5,
             "age": 0.2,
             "num_buds" : 0.1,
             "curvature": 0.3
+        }
+
+        self.signs = {
+            "length": 1,  # rami lunghi → da tagliare
+            "diameter": -1,  # rami grossi → da conservare
+            "age": -1,  # vecchi → da conservare
+            "num_buds": -1,  # molti germogli → da conservare
+            "curvature": 1  # curvi → da tagliare
         }
 
         self.old_weight_file = Path(self.project_root / "BestCutAlgorithm" / "weights_old.json")
@@ -89,7 +97,8 @@ class BranchPruner:
         score = 0.0
         for key, weight in self.weights.items():
             value = getattr(branch, key,0) or 0
-            score += weight * value
+            sign = self.signs[key]
+            score += sign * weight * value
         return score
 
     def calculate_new_weights_and_treshold(self, weight_feedback):
