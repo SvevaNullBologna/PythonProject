@@ -161,10 +161,13 @@ class BranchEstimator:
 
 
     def _estimate_age (self, length, diameter):
-        return float(self.age_factor * diameter + self.length_factor * length)
+        return float(self.age_factor * (diameter ** 1.2) + 0.2 * self.length_factor * length)
 
-    def _estimate_number_of_buds(self,length, curvature):
-        return float(self.bud_length_factor * length + self.bud_curvature_factor * curvature * 100)
+    def _estimate_number_of_buds(self,length, diameter, curvature):
+        # base su lunghezza e diametro, modula con curvatura
+        base_buds = self.bud_length_factor * (length ** 0.8) * (diameter ** 0.5)
+        curvature_bonus = self.bud_curvature_factor * curvature * 100
+        return max(float(base_buds + curvature_bonus), 0)
 
     def compute_branch_metrics(self, branch_points):
         """
@@ -197,7 +200,7 @@ class BranchEstimator:
             length, diameter = self._compute_length_and_diameter_linear_pca(pts, main_axis, center)
 
         age = self._estimate_age(length, diameter)
-        num_buds = self._estimate_number_of_buds(length, curvature)
+        num_buds = self._estimate_number_of_buds(length, diameter, curvature)
 
         return {"length" : float(length),
                 "diameter" : float(diameter),

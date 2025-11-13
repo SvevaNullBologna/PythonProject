@@ -1,8 +1,8 @@
 {
-  "length": 1.0,
+  "length": 0.3,
   "diameter": 0.5,
-  "age": 0.2,
-  "num_buds": 0.1,
-  "curvature": 0.3,
-  "cut_threshold": 1.0
+  "age": 0.5,
+  "num_buds": 1.0,
+  "curvature": 0.5,
+  "cut_threshold": 0.1
 }

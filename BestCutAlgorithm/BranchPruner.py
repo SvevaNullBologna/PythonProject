@@ -11,19 +11,19 @@ class BranchPruner:
         self.project_root = Path(__file__).resolve().parents[1]
         self.cut_threshold = 0.1
         self.weights = {
-            "length": 1.0,
+            "length": 0.3,
             "diameter": 0.5,
-            "age": 0.2,
-            "num_buds" : 0.1,
-            "curvature": 0.3
+            "age": 0.5,
+            "num_buds" : 1.0,
+            "curvature": 0.5
         }
 
         self.signs = {
             "length": 1,  # rami lunghi → da tagliare
             "diameter": -1,  # rami grossi → da conservare
-            "age": -1,  # vecchi → da conservare
+            "age": 1,  # vecchi → da tagliare
             "num_buds": -1,  # molti germogli → da conservare
-            "curvature": 1  # curvi → da tagliare
+            "curvature": 1  # molto curvi → da tagliare
         }
 
         self.old_weight_file = Path(self.project_root / "BestCutAlgorithm" / "weights_old.json")
