@@ -14,7 +14,7 @@ class BranchEstimator:
 
         self.min_number_points = 3
         self.min_points_branch = 3
-        self.curvature_threshold = 0.1
+        self.curvature_threshold = 0.01
 
         self.diameter_scale = 2
 
@@ -134,40 +134,53 @@ class BranchEstimator:
         return points.mean(axis=0)
 
     def _compute_length_and_diameter_along_curve(self, points, main_axis):
-        #lunghezza lungo la curva
-        ranges = points.max(axis=0) - points.min(axis=0)
-        main_dim = np.argmax(ranges)
-        ordered_pts = points[np.argsort(points[:, main_dim])]
+        # Calcolo del centro
+        center = points.mean(axis=0)
+
+        # PROIEZIONE sull'asse principale (ordinamento molto più robusto)
+        t = (points - center) @ main_axis
+        ordered_pts = points[np.argsort(t)]
+
+        # LUNGHEZZA a spezzata
         diffs = np.diff(ordered_pts, axis=0)
         length = np.sum(np.linalg.norm(diffs, axis=1))
 
-        #diametro rispetto al centro medio
-        center = points.mean(axis=0)
-        cross_prod = np.linalg.norm(np.cross(points - center, main_axis), axis=1)
-        diameter = self.diameter_scale * cross_prod.max()
+        # DIAMETRO robusto (usa la mediana invece del max)
+        diffs_centered = points - center
+        dist_perp = np.linalg.norm(np.cross(diffs_centered, main_axis), axis=1)
+        diameter = self.diameter_scale * np.median(dist_perp)
 
-        return length, diameter
+        return float(length), float(diameter)
 
-
-    def _compute_length_and_diameter_linear_pca(self,points, main_axis, center):
-        proj = (points - center) @ main_axis  # proiettiamo tutti i punti sull'asse principale e prendo la distanza max lungo tale asse per la lunghezza
+    def _compute_length_and_diameter_linear_pca(self, points, main_axis, center):
+        # Lunghezza PCA (la lasciamo invariata)
+        proj = (points - center) @ main_axis
         length = proj.max() - proj.min()
 
+        # DIAMETRO robusto (mediana invece del max)
         diffs = points - center
-        cross_prod = np.linalg.norm(np.cross(diffs, main_axis),axis=1)  # calcolo la distanza perpendicolare max dei punti all'asse principale
-        diameter = self.diameter_scale * cross_prod.max()
+        dist_perp = np.linalg.norm(np.cross(diffs, main_axis), axis=1)
+        diameter = self.diameter_scale * np.median(dist_perp)
 
-        return length, diameter
+        return float(length), float(diameter)
 
+    def _estimate_age(self, length, diameter):
+        # Modello più stabile e realistico
+        age = self.age_factor * np.log(1 + 10 * diameter) + 0.1 * self.length_factor * length
+        return float(age)
 
-    def _estimate_age (self, length, diameter):
-        return float(self.age_factor * (diameter ** 1.2) + 0.2 * self.length_factor * length)
+    def _estimate_number_of_buds(self, length, diameter, curvature):
+        # Densità media: 7 gemme per metro
+        base_density = 7.0
 
-    def _estimate_number_of_buds(self,length, diameter, curvature):
-        # base su lunghezza e diametro, modula con curvatura
-        base_buds = self.bud_length_factor * (length ** 0.8) * (diameter ** 0.5)
-        curvature_bonus = self.bud_curvature_factor * curvature * 100
-        return max(float(base_buds + curvature_bonus), 0)
+        # Vigore basato sul diametro
+        vigor = 1 + 0.3 * (diameter / max(0.4, diameter))
+
+        # Penalità: rami molto curvi hanno meno gemme utili
+        curvature_penalty = max(0.1, 1 - curvature)
+
+        buds = length * base_density * vigor * curvature_penalty
+        return float(buds)
 
     def compute_branch_metrics(self, branch_points):
         """

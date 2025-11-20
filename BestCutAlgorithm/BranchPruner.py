@@ -9,7 +9,7 @@ from pathlib import Path
 class BranchPruner:
     def __init__(self, result_folder = None):
         self.project_root = Path(__file__).resolve().parents[1]
-        self.cut_threshold = 0.1
+        self.cut_threshold = 0.5
         self.weights = {
             "length": 0.3,
             "diameter": 0.5,
@@ -19,7 +19,7 @@ class BranchPruner:
         }
 
         self.signs = {
-            "length": 1,  # rami lunghi → da tagliare
+            "length": -1,  # rami lunghi → da tagliare
             "diameter": -1,  # rami grossi → da conservare
             "age": 1,  # vecchi → da tagliare
             "num_buds": -1,  # molti germogli → da conservare
@@ -37,6 +37,8 @@ class BranchPruner:
         self.best_cut_dir.mkdir(exist_ok=True)
 
         self.__set_starting_weights()
+
+    #  gestione file dei pesi
 
     def __set_starting_weights(self):
         if not self.new_weight_file.exists() or os.stat(self.new_weight_file).st_size == 0 :
@@ -84,21 +86,33 @@ class BranchPruner:
         shutil.move(self.new_weight_file, self.old_weight_file)
         print(f"new weights promoted to old")
 
+    # funzioni per il calcolo del taglio
+
     def calculate_best_cut(self, grapevine: GrapeVine ):
         branches_to_cut = []
         for branch in grapevine.tree_elements:
             if branch.classTitle != "Tree":
-                branch.score = self._calculate_branch_score(branch)
+                branch.score = self._calculate_branch_score(branch, grapevine)
                 if branch.score >= self.cut_threshold :
                     branches_to_cut.append(branch)
         return branches_to_cut
 
-    def _calculate_branch_score(self, branch: Branch):
+    def _normalize_branch_value(self, key, value, grapevine):
+        # Trova min e max per ogni attributo in tutti i rami
+        values = [getattr(b, key, 0) or 0 for b in grapevine.tree_elements if b.classTitle != "Tree"]
+        min_val = min(values)
+        max_val = max(values)
+        if max_val - min_val == 0:
+            return 0.5  # caso speciale: tutti uguali
+        return (value - min_val) / (max_val - min_val)
+
+    def _calculate_branch_score(self, branch: Branch, grapevine: GrapeVine):
         score = 0.0
         for key, weight in self.weights.items():
-            value = getattr(branch, key,0) or 0
+            raw_value = getattr(branch, key,0) or 0
+            normalized_value = self._normalize_branch_value(key, raw_value, grapevine)
             sign = self.signs[key]
-            score += sign * weight * value
+            score += sign * weight * normalized_value
         return score
 
     def calculate_new_weights_and_treshold(self, weight_feedback):
