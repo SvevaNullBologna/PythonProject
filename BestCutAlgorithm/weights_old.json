@@ -4,5 +4,5 @@
   "age": 0.5,
   "num_buds": 1.0,
   "curvature": 0.5,
-  "cut_threshold": 0.5
+  "cut_threshold": 0.2
 }

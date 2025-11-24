@@ -9,7 +9,7 @@ from pathlib import Path
 class BranchPruner:
     def __init__(self, result_folder = None):
         self.project_root = Path(__file__).resolve().parents[1]
-        self.cut_threshold = 0.5
+        self.cut_threshold = 0.2
         self.weights = {
             "length": 0.3,
             "diameter": 0.5,
@@ -19,7 +19,7 @@ class BranchPruner:
         }
 
         self.signs = {
-            "length": -1,  # rami lunghi → da tagliare
+            "length": 1,  # rami lunghi → da tagliare
             "diameter": -1,  # rami grossi → da conservare
             "age": 1,  # vecchi → da tagliare
             "num_buds": -1,  # molti germogli → da conservare
@@ -91,9 +91,12 @@ class BranchPruner:
     def calculate_best_cut(self, grapevine: GrapeVine ):
         branches_to_cut = []
         for branch in grapevine.tree_elements:
+            print(f"branch classTitle in calculate best cut {branch.classTitle}")
             if branch.classTitle != "Tree":
                 branch.score = self._calculate_branch_score(branch, grapevine)
-                if branch.score >= self.cut_threshold :
+                decision = branch.score >= self.cut_threshold
+                print(f"branch score: {branch.score} >= {self.cut_threshold} : {decision}")
+                if decision:
                     branches_to_cut.append(branch)
         return branches_to_cut
 
@@ -153,6 +156,21 @@ class BranchPruner:
             json.dump(data, f, indent=2)
         print(f"Best cut salvato in {output_filename}")
 
+
+if __name__ == "__main__":
+    g = GrapeVine()
+    g.set_basefolder(r"C:\Users\Sveva\Desktop\Materiale")
+    g.load_grapevine_from_file("dataset 2025-10-09 10-36-06_albero.json")
+
+    result_path = Path("C:\\Users\Sveva\Desktop")
+    bp = BranchPruner(result_path)
+
+    branches_to_cut = bp.calculate_best_cut(g)
+    if len(branches_to_cut) > 0 :
+        print(f"there are {len(branches_to_cut)} branches to cut")
+    else :
+        print("no branches to cut")
+    bp.print_best_cut(g, branches_to_cut)
 
 
 
